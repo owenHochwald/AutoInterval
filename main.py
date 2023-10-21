@@ -29,12 +29,14 @@ intervals = {
     "P8": 12
 }
 
+NUM_PITCHES = 12
 
-def get_starting_pitch() -> str:
+
+def get_starting_pitch() -> tuple:
     pitch = input("Enter a pitch: ")
-    for group in pitches:
+    for group_index, group in enumerate(pitches):
         if pitch in group:
-            return pitch, group
+            return pitch, group_index
     else:
         print("Invalid pitch. Please enter a pitch from the list.")
         return get_starting_pitch()
@@ -56,27 +58,23 @@ def get_direction() -> str:
     return direction
 
 
-def calculate_interval(starting_pitch, pitches, interval_distance, direction) -> str:
-    starting_pitch_index = pitches.index(starting_pitch)
-    interval_distance_increment = intervals[interval_distance]
-    num_pitches = len(pitches)
+def calculate_interval(starting_pitch, pitch_index, interval_distance, direction):
+    # starting_pitch_group_index = pitches.index(starting_pitch)
+    interval_distance_increment = intervals.get(interval_distance)
 
     if direction == "up":
-        second_pitch_index = starting_pitch_index + interval_distance_increment
-        while second_pitch_index >= num_pitches:
-            second_pitch_index -= num_pitches
+        second_pitch_group_index = (pitch_index + interval_distance_increment) % NUM_PITCHES
     else:
-        second_pitch_index = starting_pitch_index - interval_distance_increment
-        while second_pitch_index < 0:
-            second_pitch_index += num_pitches
+        second_pitch_group_index = (pitch_index - interval_distance_increment) % NUM_PITCHES
 
-    second_pitch = pitches[second_pitch_index]
-
-    return f"Starting on {starting_pitch} and going {direction} a {interval_distance} gives you {second_pitch}"
-
+    second_pitch = pitches[second_pitch_group_index]
+    if len(second_pitch) > 0:
+        return f"Starting on {starting_pitch} and going {direction} a {interval_distance} gives you {second_pitch[0]}, which is a change of {interval_distance_increment} half-step/s."
+    else:
+        return f"Starting on {starting_pitch} and going {direction} a {interval_distance} gives you {second_pitch[0]} / {second_pitch[1]}, which is a change of {interval_distance_increment} half-step/s."
 
 if __name__ == '__main__':
-    starting_pitch, pitches = get_starting_pitch()
+    starting_pitch, pitch_index = get_starting_pitch()
     interval_distance = get_interval_distance()
     direction = get_direction()
-    print(calculate_interval(starting_pitch, pitches, interval_distance, direction))
+    print(calculate_interval(starting_pitch, pitch_index, interval_distance, direction))
